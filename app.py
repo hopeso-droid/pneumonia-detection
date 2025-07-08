@@ -42,7 +42,7 @@ def download_model_from_github():
     
     # 如果本地没有，尝试从GitHub下载
     # 模型下载URL - 您需要替换为实际的GitHub Release URL
-    model_url = "https://github.com/your-username/pneumonia-detection/releases/download/v1.0/best.pt"
+    model_url = "https://github.com/hopeso-droid/pneumonia-detection/releases/download/v1.0/best.pt"
     
     try:
         st.info("🔄 正在从GitHub下载专业肺炎检测模型...")
