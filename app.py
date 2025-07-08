@@ -67,7 +67,7 @@ def download_model_from_github():
     for i, model_url in enumerate(model_urls):
         try:
             method_name = "GitHub Release" if i == 0 else "直接文件"
-            st.info(f"🔄 正在从{method_name}下载专业肺炎检测模型（仅首次需要）...")
+            st.info(f"🔄 正在从下载专业肺炎检测模型（仅首次需要）...")
             
             with st.spinner("下载中，请稍候..."):
                 response = requests.get(model_url, stream=True)
@@ -94,7 +94,7 @@ def download_model_from_github():
                 
                 # 清除进度显示
                 progress_container.empty()
-                st.success(f"✅ 专业肺炎检测模型下载完成并已缓存！（来源：{method_name}）")
+                st.success(f"✅ 专业肺炎检测模型下载完成并已缓存")
                 st.info("💡 下次使用时将直接从缓存加载，无需重复下载")
                 return str(cached_model_path)
                 
