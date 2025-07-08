@@ -133,10 +133,8 @@ def load_model():
         
         if custom_model_path and os.path.exists(custom_model_path):
             try:
-                # st.info("🧠 正在加载专业肺炎检测模型...")
+                # 静默加载，不显示任何信息
                 model = YOLO(custom_model_path)
-                # st.success("✅ 专业肺炎检测模型加载成功！")
-                # st.info(f"🏷️ 检测类别: {', '.join([CHINESE_LABELS.get(name, name) for name in model.names.values()])}")
                 return model, "custom"
             except Exception as e:
                 st.warning(f"⚠️ 自定义模型加载失败: {str(e)}")
@@ -297,7 +295,7 @@ def main():
             
             # 显示原始图像
             with col1:
-                st.image(image, caption=f"📁 {uploaded_file.name}", width=800)
+                st.image(image, caption=f"📁 {uploaded_file.name}", width=600)
                 
                 # 显示图像信息
                 st.info(f"""
@@ -320,7 +318,7 @@ def main():
                                 result_image_rgb = cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB)
                             else:
                                 result_image_rgb = result_image
-                            st.image(result_image_rgb, caption="🎯 AI检测结果", width=800)
+                            st.image(result_image_rgb, caption="🎯 AI检测结果", width=600)
                         
                         # 显示检测统计
                         if detections:
@@ -433,13 +431,14 @@ def main():
             # 显示模型信息
             if model is not None:
                 if model_type == "custom":
-                    st.success("""
-                    🧠 **专业肺炎检测模型已就绪**
-                    
-                    - 专门训练用于肺炎检测
-                    - 可识别不同严重程度
-                    - 提供风险等级评估
-                    """)
+                    # st.success("""
+                    # 🧠 **专业肺炎检测模型已就绪**
+                    # 
+                    # - 专门训练用于肺炎检测
+                    # - 可识别不同严重程度
+                    # - 提供风险等级评估
+                    # """)
+                    pass
                 else:
                     st.warning("""
                     🧠 **通用检测模型已就绪**
