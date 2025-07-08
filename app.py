@@ -47,12 +47,12 @@ def download_model_from_github():
     
     # 优先使用缓存文件
     if cached_model_path.exists():
-        st.info("📁 使用缓存的专业肺炎检测模型")
+        # st.info("📁 使用缓存的专业肺炎检测模型")
         return str(cached_model_path)
     
     # 其次使用本地文件（便于开发和测试）
     if os.path.exists(local_model_path):
-        st.info("📁 使用本地专业肺炎检测模型")
+        # st.info("📁 使用本地专业肺炎检测模型")
         return local_model_path
     
     # 创建缓存目录
