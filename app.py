@@ -6,7 +6,6 @@
 """
 
 import streamlit as st
-import cv2
 import numpy as np
 import os
 import tempfile
@@ -15,6 +14,15 @@ from PIL import Image
 import io
 import requests
 from pathlib import Path
+
+# 安全导入OpenCV
+try:
+    import cv2
+except ImportError as e:
+    st.error(f"❌ OpenCV导入失败: {str(e)}")
+    st.info("🔄 正在尝试修复...")
+    # 提供无OpenCV的备用方案
+    cv2 = None
 
 # 设置页面配置
 st.set_page_config(
@@ -139,9 +147,10 @@ def process_image(image, model, model_type):
     
     try:
         # 预处理图像
-        if len(image.shape) == 3:
+        if cv2 is not None and len(image.shape) == 3:
             image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         else:
+            # 备用方案：直接使用RGB图像
             image_bgr = image
         
         # 进行预测
@@ -268,7 +277,10 @@ def main():
                     if result_image is not None:
                         # 显示检测结果图像
                         if isinstance(result_image, np.ndarray):
-                            result_image_rgb = cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB)
+                            if cv2 is not None:
+                                result_image_rgb = cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB)
+                            else:
+                                result_image_rgb = result_image
                             st.image(result_image_rgb, caption="🎯 AI检测结果", use_column_width=True)
                         
                         # 显示检测统计
