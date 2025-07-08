@@ -48,36 +48,56 @@ def download_model_from_github():
         st.info("📁 使用本地专业肺炎检测模型")
         return local_model_path
     
-    # 如果本地没有，尝试从GitHub下载
-    # 模型下载URL - 您需要替换为实际的GitHub Release URL
-    model_url = "https://github.com/hopeso-droid/pneumonia-detection/releases/download/v1.0/best.pt"
+    # 如果本地没有，尝试从多个来源下载
+    model_urls = [
+        "https://github.com/hopeso-droid/pneumonia-detection/releases/download/v1.0/best.pt",  # Release方式
+        "https://github.com/hopeso-droid/pneumonia-detection/raw/main/best.pt",  # 直接文件方式
+    ]
     
-    try:
-        st.info("🔄 正在从GitHub下载专业肺炎检测模型...")
-        with st.spinner("下载中，请稍候..."):
-            response = requests.get(model_url, stream=True)
-            response.raise_for_status()
+    for i, model_url in enumerate(model_urls):
+        try:
+            method_name = "GitHub Release" if i == 0 else "直接文件"
+            st.info(f"🔄 正在从{method_name}下载专业肺炎检测模型...")
             
-            total_size = int(response.headers.get('content-length', 0))
-            progress_bar = st.progress(0)
-            
-            with open(local_model_path, 'wb') as f:
-                downloaded = 0
-                for chunk in response.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
-                        downloaded += len(chunk)
-                        if total_size > 0:
-                            progress = downloaded / total_size
-                            progress_bar.progress(progress)
-            
-            st.success("✅ 专业肺炎检测模型下载完成！")
-            return local_model_path
-            
-    except Exception as e:
-        st.error(f"❌ 模型下载失败: {str(e)}")
-        st.info("🔄 尝试使用备用通用模型...")
-        return None
+            with st.spinner("下载中，请稍候..."):
+                response = requests.get(model_url, stream=True)
+                response.raise_for_status()
+                
+                total_size = int(response.headers.get('content-length', 0))
+                progress_bar = st.progress(0)
+                
+                with open(local_model_path, 'wb') as f:
+                    downloaded = 0
+                    for chunk in response.iter_content(chunk_size=8192):
+                        if chunk:
+                            f.write(chunk)
+                            downloaded += len(chunk)
+                            if total_size > 0:
+                                progress = downloaded / total_size
+                                progress_bar.progress(progress)
+                
+                st.success(f"✅ 专业肺炎检测模型下载完成！（来源：{method_name}）")
+                return local_model_path
+                
+        except requests.exceptions.HTTPError as e:
+            if "404" in str(e):
+                st.warning(f"⚠️ {method_name}中未找到模型文件")
+                if i < len(model_urls) - 1:
+                    st.info("🔄 尝试其他下载方式...")
+                    continue
+            else:
+                st.error(f"❌ {method_name}下载失败: {str(e)}")
+        except Exception as e:
+            st.error(f"❌ {method_name}下载失败: {str(e)}")
+            if i < len(model_urls) - 1:
+                st.info("🔄 尝试其他下载方式...")
+                continue
+    
+    # 如果所有方式都失败
+    st.error("❌ 所有下载方式都失败")
+    st.info("💡 请确认Release已创建或将best.pt文件推送到main分支")
+    st.info("🔄 现在使用备用通用模型...")
+    return None
 
 @st.cache_resource
 def load_model():
@@ -258,7 +278,7 @@ def main():
             
             # 显示原始图像
             with col1:
-                st.image(image, caption=f"📁 {uploaded_file.name}", use_column_width=True)
+                st.image(image, caption=f"📁 {uploaded_file.name}", use_container_width=True)
                 
                 # 显示图像信息
                 st.info(f"""
@@ -281,7 +301,7 @@ def main():
                                 result_image_rgb = cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB)
                             else:
                                 result_image_rgb = result_image
-                            st.image(result_image_rgb, caption="🎯 AI检测结果", use_column_width=True)
+                            st.image(result_image_rgb, caption="🎯 AI检测结果", use_container_width=True)
                         
                         # 显示检测统计
                         if detections:
@@ -414,7 +434,7 @@ def main():
     st.markdown("---")
     st.markdown("""
     <div style='text-align: center; color: #666;'>
-        🚀 基于 <a href='https://github.com/ultralytics/ultralytics'>YOLOv8</a> 构建 | 
+        🚀 合溪生物科技 | 
         💻 部署于 <a href='https://streamlit.io/cloud'>Streamlit Cloud</a> | 
         🩺 专业肺炎检测模型 | 
         🔬 仅供医学研究使用
