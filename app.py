@@ -40,33 +40,48 @@ CHINESE_LABELS = {
 }
 
 def download_model_from_github():
-    """从GitHub Release下载模型文件或使用本地文件"""
+    """从GitHub Release下载模型文件或使用本地缓存"""
     local_model_path = "best.pt"
+    cache_dir = Path.home() / ".cache" / "pneumonia-detection"
+    cached_model_path = cache_dir / "best.pt"
     
-    # 优先使用本地文件（便于开发和测试）
+    # 优先使用缓存文件
+    if cached_model_path.exists():
+        st.info("📁 使用缓存的专业肺炎检测模型")
+        return str(cached_model_path)
+    
+    # 其次使用本地文件（便于开发和测试）
     if os.path.exists(local_model_path):
-        # st.info("📁 使用本地专业肺炎检测模型")
+        st.info("📁 使用本地专业肺炎检测模型")
         return local_model_path
     
-    # 如果本地没有，尝试从多个来源下载
+    # 创建缓存目录
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    
+    # 从GitHub Release下载
     model_urls = [
-        "https://github.com/hopeso-droid/pneumonia-detection/releases/download/v1.0/best.pt",  # Release方式
-        "https://github.com/hopeso-droid/pneumonia-detection/raw/main/best.pt",  # 直接文件方式
+        "https://github.com/hopeso-droid/pneumonia-detection/releases/download/v1.0/best.pt",  # Release方式（推荐）
+        "https://github.com/hopeso-droid/pneumonia-detection/raw/main/run/weights/best.pt",  # 直接文件方式（备用）
     ]
     
     for i, model_url in enumerate(model_urls):
         try:
             method_name = "GitHub Release" if i == 0 else "直接文件"
-            st.info(f"🔄 正在从{method_name}下载专业肺炎检测模型...")
+            st.info(f"🔄 正在从{method_name}下载专业肺炎检测模型（仅首次需要）...")
             
             with st.spinner("下载中，请稍候..."):
                 response = requests.get(model_url, stream=True)
                 response.raise_for_status()
                 
                 total_size = int(response.headers.get('content-length', 0))
-                progress_bar = st.progress(0)
                 
-                with open(local_model_path, 'wb') as f:
+                # 创建进度条
+                progress_container = st.container()
+                with progress_container:
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()
+                
+                with open(cached_model_path, 'wb') as f:
                     downloaded = 0
                     for chunk in response.iter_content(chunk_size=8192):
                         if chunk:
@@ -75,9 +90,13 @@ def download_model_from_github():
                             if total_size > 0:
                                 progress = downloaded / total_size
                                 progress_bar.progress(progress)
+                                status_text.text(f"已下载: {downloaded // 1024 // 1024:.1f}MB / {total_size // 1024 // 1024:.1f}MB")
                 
-                st.success(f"✅ 专业肺炎检测模型下载完成！（来源：{method_name}）")
-                return local_model_path
+                # 清除进度显示
+                progress_container.empty()
+                st.success(f"✅ 专业肺炎检测模型下载完成并已缓存！（来源：{method_name}）")
+                st.info("💡 下次使用时将直接从缓存加载，无需重复下载")
+                return str(cached_model_path)
                 
         except requests.exceptions.HTTPError as e:
             if "404" in str(e):
