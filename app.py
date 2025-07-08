@@ -45,7 +45,7 @@ def download_model_from_github():
     
     # 优先使用本地文件（便于开发和测试）
     if os.path.exists(local_model_path):
-        st.info("📁 使用本地专业肺炎检测模型")
+        # st.info("📁 使用本地专业肺炎检测模型")
         return local_model_path
     
     # 如果本地没有，尝试从多个来源下载
@@ -114,10 +114,10 @@ def load_model():
         
         if custom_model_path and os.path.exists(custom_model_path):
             try:
-                st.info("🧠 正在加载专业肺炎检测模型...")
+                # st.info("🧠 正在加载专业肺炎检测模型...")
                 model = YOLO(custom_model_path)
-                st.success("✅ 专业肺炎检测模型加载成功！")
-                st.info(f"🏷️ 检测类别: {', '.join([CHINESE_LABELS.get(name, name) for name in model.names.values()])}")
+                # st.success("✅ 专业肺炎检测模型加载成功！")
+                # st.info(f"🏷️ 检测类别: {', '.join([CHINESE_LABELS.get(name, name) for name in model.names.values()])}")
                 return model, "custom"
             except Exception as e:
                 st.warning(f"⚠️ 自定义模型加载失败: {str(e)}")
