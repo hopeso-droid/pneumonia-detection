@@ -297,7 +297,7 @@ def main():
             
             # 显示原始图像
             with col1:
-                st.image(image, caption=f"📁 {uploaded_file.name}", width=400)
+                st.image(image, caption=f"📁 {uploaded_file.name}", width=800)
                 
                 # 显示图像信息
                 st.info(f"""
@@ -320,7 +320,7 @@ def main():
                                 result_image_rgb = cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB)
                             else:
                                 result_image_rgb = result_image
-                            st.image(result_image_rgb, caption="🎯 AI检测结果", width=400)
+                            st.image(result_image_rgb, caption="🎯 AI检测结果", width=800)
                         
                         # 显示检测统计
                         if detections:
